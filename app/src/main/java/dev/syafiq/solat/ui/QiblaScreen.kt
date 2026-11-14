@@ -101,7 +101,7 @@ fun QiblaScreen(vm: MainViewModel, onNeedLocation: () -> Unit) {
         }
 
         if (compass.accuracy <= SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-            Label("Low accuracy. Move your phone in a figure 8.", size = 12.sp, color = Red, align = TextAlign.Center)
+            Label("Compass not calibrated. Move your phone in a figure 8, away from magnets and metal.", size = 12.sp, color = Red, align = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
         }
         Label(
@@ -196,12 +196,24 @@ private fun rememberCompass(declination: Float): CompassState {
                 state.heading = Qibla.normalize(deg.toDouble()).toFloat()
             }
 
+            override fun onAccuracyChanged(s: Sensor, accuracy: Int) = Unit
+        }
+        // the rotation vector rarely reports accuracy itself; the magnetometer's tells us when calibration is off
+        val magListener = object : SensorEventListener {
+            override fun onSensorChanged(e: SensorEvent) {
+                state.accuracy = e.accuracy
+            }
+
             override fun onAccuracyChanged(s: Sensor, accuracy: Int) {
                 state.accuracy = accuracy
             }
         }
         sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
-        onDispose { sm.unregisterListener(listener) }
+        sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let { sm.registerListener(magListener, it, SensorManager.SENSOR_DELAY_NORMAL) }
+        onDispose {
+            sm.unregisterListener(listener)
+            sm.unregisterListener(magListener)
+        }
     }
     return state
 }
