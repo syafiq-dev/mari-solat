@@ -41,7 +41,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit) {
+fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: () -> Unit) {
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -111,7 +111,13 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit) {
                 Label(it, color = Red, size = 13.sp, modifier = Modifier.weight(1f, fill = false))
                 Spacer(Modifier.width(12.dp))
                 Label("Retry", caps = true, size = 12.sp, medium = true, modifier = Modifier
-                    .clickable { if (vm.zone == null) onChangeZone() else vm.load(force = true) }
+                    .clickable {
+                        when {
+                            vm.autoZone && vm.location == null -> onNeedLocation()
+                            vm.zone == null -> onChangeZone()
+                            else -> vm.load(force = true)
+                        }
+                    }
                     .padding(8.dp))
             }
         }

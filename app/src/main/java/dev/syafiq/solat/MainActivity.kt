@@ -1,7 +1,18 @@
 package dev.syafiq.solat
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
@@ -56,18 +67,41 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private val LOCATION_PERMS = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+
+private fun Context.hasLocationPermission() =
+    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+private fun Context.locationOn() = LocationManagerCompat.isLocationEnabled(getSystemService(LocationManager::class.java))
+
 @Composable
 private fun App(vm: MainViewModel) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var picking by rememberSaveable { mutableStateOf(false) }
 
+    val activity = LocalContext.current as ComponentActivity
+    var fromButton by remember { mutableStateOf(false) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { res ->
         val granted = res.values.any { it }
+        when {
+            // Android stops showing the prompt after two denials, so send the user to app settings instead
+            !granted && fromButton && !activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) ->
+                activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", activity.packageName, null)))
+            granted && fromButton && !activity.locationOn() -> activity.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+        }
+        fromButton = false
         vm.onPermission(granted)
         if (!granted && vm.zone == null) picking = true
     }
-    LaunchedEffect(Unit) {
-        permission.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+    val askLocation = {
+        fromButton = true
+        permission.launch(LOCATION_PERMS)
+    }
+    LaunchedEffect(Unit) { permission.launch(LOCATION_PERMS) }
+    // back from the settings screens: retry if location is now usable
+    LifecycleResumeEffect(Unit) {
+        if (vm.location == null && activity.hasLocationPermission() && activity.locationOn()) vm.onPermission(true)
+        onPauseOrDispose { }
     }
 
     Box(
@@ -83,7 +117,7 @@ private fun App(vm: MainViewModel) {
                 onAuto = {
                     picking = false
                     vm.useAuto() // detection runs once the permission result comes back
-                    permission.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                    askLocation()
                 },
                 onPick = { vm.pick(it); picking = false },
                 onClose = { picking = false },
@@ -92,10 +126,8 @@ private fun App(vm: MainViewModel) {
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.weight(1f)) {
                     when (tab) {
-                        0 -> PrayerScreen(vm, onChangeZone = { picking = true })
-                        else -> QiblaScreen(vm, onNeedLocation = {
-                            permission.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
-                        })
+                        0 -> PrayerScreen(vm, onChangeZone = { picking = true }, onNeedLocation = askLocation)
+                        else -> QiblaScreen(vm, onNeedLocation = askLocation)
                     }
                 }
                 TabBar(tab) { tab = it }
