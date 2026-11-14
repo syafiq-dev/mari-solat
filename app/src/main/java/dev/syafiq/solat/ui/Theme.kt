@@ -25,15 +25,19 @@ val Red = Color(0xFFD71921)
 
 data class Palette(val bg: Color, val fg: Color, val dim: Color, val faint: Color)
 
-private val Dark = Palette(bg = Color.Black, fg = Color.White, dim = Color(0xFF8C8C8C), faint = Color(0xFF262626))
-private val Light = Palette(bg = Color(0xFFF2F2F2), fg = Color.Black, dim = Color(0xFF6E6E6E), faint = Color(0xFFDADADA))
+// Nothing brand palette: black, white, gray #B1B3B3, light gray #F4F4F4, red #D71921 used sparingly.
+private val Dark = Palette(bg = Color.Black, fg = Color.White, dim = Color(0xFFB1B3B3), faint = Color(0xFF262626))
+// light mode keeps secondary text darker than #B1B3B3 so it stays readable on white
+private val Light = Palette(bg = Color.White, fg = Color.Black, dim = Color(0xFF6B6D6D), faint = Color(0xFFF4F4F4))
 
 val LocalPalette = staticCompositionLocalOf { Dark }
 val colors: Palette @Composable get() = LocalPalette.current
 
-/** Dot-matrix display face (Doto, OFL) standing in for Nothing's NDot. */
+// Nothing's type roles with open-licence stand-ins (the brand fonts are proprietary):
+// Ndot -> Doto (dot-matrix display), NType 82 -> Space Grotesk (headings/body), LL Lettera Mono -> Space Mono (labels).
 val DotFont = FontFamily(Font(R.font.doto_bold, FontWeight.Bold))
 val SansFont = FontFamily(Font(R.font.grotesk_regular), Font(R.font.grotesk_medium, FontWeight.Medium))
+val MonoFont = FontFamily(Font(R.font.mono_regular))
 
 @Composable
 fun SolatTheme(content: @Composable () -> Unit) {
@@ -55,11 +59,11 @@ fun Label(
     if (caps) text.uppercase() else text,
     modifier,
     style = TextStyle(
-        fontFamily = SansFont,
-        fontWeight = if (medium) FontWeight.Medium else FontWeight.Normal,
+        fontFamily = if (caps) MonoFont else SansFont, // uppercase labels and callouts use the mono face
+        fontWeight = if (medium && !caps) FontWeight.Medium else FontWeight.Normal,
         fontSize = size,
         color = color,
-        letterSpacing = if (caps) 0.12.em else 0.em,
+        letterSpacing = if (caps) 0.06.em else 0.em,
         textAlign = align,
     ),
     maxLines = maxLines,

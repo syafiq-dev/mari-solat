@@ -17,6 +17,14 @@ Kotlin + Jetpack Compose, no Google Play Services, minSdk 26.
 
 Every push to `main` builds an APK in GitHub Actions (see the run's **Artifacts**). Pushing a `v*` tag also publishes it as a GitHub release.
 
-## Fonts
+## Design
 
-[Doto](https://github.com/oliverlalan/Doto) and [Space Grotesk](https://github.com/floriankarsten/space-grotesk), both under the SIL Open Font License (see `licenses/`).
+Follows Nothing's brand palette (black, white, gray `#B1B3B3`, light gray `#F4F4F4`, red `#D71921` as the only accent) and its three type roles. Nothing's own fonts are proprietary, so the app ships open-licence stand-ins:
+
+| Role | Nothing font | Used here |
+|---|---|---|
+| Dot-matrix display | Ndot | [Doto](https://github.com/oliverlalan/Doto) |
+| Headings and body | NType 82 | [Space Grotesk](https://github.com/floriankarsten/space-grotesk) |
+| Labels and callouts | LL Lettera Mono | [Space Mono](https://github.com/googlefonts/spacemono) |
+
+All three are under the SIL Open Font License (see `licenses/`). If you hold a licence for the originals, replace `doto_bold.ttf`, `grotesk_regular.ttf` / `grotesk_medium.ttf` and `mono_regular.ttf` in `app/src/main/res/font/` with files of the same names. Don't commit them to a public repo unless the licence allows redistribution.
