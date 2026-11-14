@@ -46,7 +46,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun pick(z: Zone) {
         autoZone = false; repo.autoZone = false
-        setZone(z)
+        applyZone(z)
     }
 
     fun loadZones() {
@@ -69,14 +69,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private fun detect() = launchTask {
         val loc = repo.location() ?: throw IllegalStateException("Couldn't get your location. Turn on location or pick a zone.")
         location = loc
-        setZone(repo.zoneAt(loc.latitude, loc.longitude))
+        applyZone(repo.zoneAt(loc.latitude, loc.longitude))
     }
 
     private fun refreshLocation() = viewModelScope.launch {
         runCatching { repo.location() }.getOrNull()?.let { location = it }
     }
 
-    private fun setZone(z: Zone) {
+    private fun applyZone(z: Zone) {
         val changed = z.code != zone?.code
         zone = z; repo.zone = z
         if (changed || days.isEmpty()) load()
