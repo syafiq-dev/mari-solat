@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,17 +88,21 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
         }
 
         Spacer(Modifier.height(36.dp))
-        Label(today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.ENGLISH)), color = colors.dim, size = 13.sp)
-        day?.let { Label(formatHijri(it.hijri), color = colors.dim, size = 13.sp) }
+        Label(
+            today.format(DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH)).uppercase() + "  |  " +
+                today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH)),
+            size = 20.sp,
+        )
+        day?.let { Label(formatHijri(it.hijri), color = colors.dim, size = 20.sp) }
 
         // Countdown
         Spacer(Modifier.height(28.dp))
         if (next != null) {
             val (prayer, at) = next
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(8.dp).background(Red, CircleShape))
-                Spacer(Modifier.width(8.dp))
-                Label("${prayer.label} in", caps = true, size = 12.sp, color = colors.dim)
+                Box(Modifier.size(10.dp).background(Red, CircleShape))
+                Spacer(Modifier.width(10.dp))
+                Label("${prayer.label} in", caps = true, size = 16.sp, color = colors.dim)
             }
             Spacer(Modifier.height(4.dp))
             Dots(countdown(Duration.between(now, at)), size = 64.sp)
@@ -126,7 +131,28 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
         Spacer(Modifier.height(32.dp))
         if (day != null) {
             val nextPrayer = next?.takeIf { it.second.atZone(MYT).toLocalDate() == today }?.first
-            Prayer.entries.forEach { p ->
+
+            // secondary times: one balanced row of three equal cells
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(colors.faint, RoundedCornerShape(20.dp))
+                    .padding(vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SECONDARY.forEachIndexed { i, p ->
+                    if (i > 0) Box(Modifier.width(1.dp).height(32.dp).background(colors.dim.copy(alpha = 0.3f)))
+                    val zt = day.times.getValue(p).atZone(MYT)
+                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Label(p.label, caps = true, size = 11.sp, color = if (p == nextPrayer) Red else colors.dim)
+                        Spacer(Modifier.height(4.dp))
+                        Dots(zt.format(timeFmt) + if (is24h) "" else zt.format(ampm).lowercase(), size = 18.sp)
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+
+            MAIN.forEach { p ->
                 val t = day.times.getValue(p)
                 val isNext = p == nextPrayer
                 val passed = !t.isAfter(now)
@@ -174,6 +200,9 @@ fun Pill(text: String, active: Boolean, modifier: Modifier = Modifier) {
         Label(text, size = 11.sp, medium = true)
     }
 }
+
+private val SECONDARY = listOf(Prayer.IMSAK, Prayer.SYURUK, Prayer.DHUHA)
+private val MAIN = listOf(Prayer.FAJR, Prayer.DHUHR, Prayer.ASR, Prayer.MAGHRIB, Prayer.ISHA)
 
 internal fun countdown(d: Duration): String {
     val s = d.seconds.coerceAtLeast(0)

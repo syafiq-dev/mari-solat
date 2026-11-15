@@ -13,7 +13,7 @@ val MYT: ZoneId = ZoneId.of("Asia/Kuala_Lumpur")
 enum class Prayer(val key: String, val label: String) {
     IMSAK("imsak", "Imsak"),
     FAJR("fajr", "Subuh"),
-    SYURUK("syuruk", "Syuruk"),
+    SYURUK("syuruk", "Sunrise"),
     DHUHA("dhuha", "Dhuha"),
     DHUHR("dhuhr", "Zohor"),
     ASR("asr", "Asar"),

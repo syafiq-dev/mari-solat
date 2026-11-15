@@ -1,4 +1,4 @@
-# Solat
+# Mari Solat
 
 A small Android app for Malaysian prayer times and Qibla direction, styled after Nothing OS: monochrome, dot-matrix numerals, one red accent.
 
@@ -15,7 +15,7 @@ Kotlin + Jetpack Compose, no Google Play Services, minSdk 26.
 ./gradlew assembleRelease   # app/build/outputs/apk/release/app-release.apk
 ```
 
-Every push to `main` builds an APK in GitHub Actions and publishes it as the **Latest build** release: [download solat.apk](https://github.com/syafiq-dev/mari-solat/releases/latest/download/solat.apk).
+Every push to `main` builds an APK in GitHub Actions and publishes it as the **Latest build** release: [download mari-solat.apk](https://github.com/syafiq-dev/mari-solat/releases/latest/download/mari-solat.apk).
 
 ## Design
 
