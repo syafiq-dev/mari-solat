@@ -15,7 +15,7 @@ Kotlin + Jetpack Compose, no Google Play Services, minSdk 26.
 ./gradlew assembleRelease   # app/build/outputs/apk/release/app-release.apk
 ```
 
-Every push to `main` builds an APK in GitHub Actions (see the run's **Artifacts**). Pushing a `v*` tag also publishes it as a GitHub release.
+Every push to `main` builds an APK in GitHub Actions and publishes it as the **Latest build** release: [download solat.apk](https://github.com/syafiq-dev/mari-solat/releases/latest/download/solat.apk).
 
 ## Design
 
