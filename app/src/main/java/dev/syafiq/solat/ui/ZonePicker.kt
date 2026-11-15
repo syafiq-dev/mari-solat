@@ -67,17 +67,38 @@ fun ZonePicker(vm: MainViewModel, onAuto: () -> Unit, onPick: (Zone) -> Unit, on
         }
         Spacer(Modifier.height(8.dp))
 
-        LazyColumn(Modifier.weight(1f)) {
-            item {
-                Row(
-                    Modifier.fillMaxWidth().clickable(onClick = onAuto).padding(vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(Modifier.size(8.dp).background(Red, CircleShape))
-                    Spacer(Modifier.width(12.dp))
-                    Label("Use my location", medium = true, size = 16.sp)
+        // pinned: never scrolls away
+        Row(
+            Modifier.fillMaxWidth().clickable(onClick = onAuto).padding(vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(8.dp).background(Red, CircleShape))
+            Spacer(Modifier.width(12.dp))
+            Label("Use my location", medium = true, size = 16.sp)
+        }
+        vm.zone?.let { z ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(colors.faint, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Label("Selected", caps = true, size = 11.sp, color = colors.dim)
+                    Spacer(Modifier.height(2.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Dots(z.code, size = 16.sp, color = Red)
+                        Spacer(Modifier.width(10.dp))
+                        Label((if (vm.autoZone) vm.place else null) ?: z.district, size = 14.sp, maxLines = 1)
+                    }
                 }
+                Pill(if (vm.autoZone) "AUTO" else "MANUAL", active = vm.autoZone)
             }
+        }
+        Box(Modifier.fillMaxWidth().padding(top = 8.dp).height(1.dp).background(colors.faint))
+
+        LazyColumn(Modifier.weight(1f)) {
             when {
                 vm.zones.isEmpty() && vm.busy -> item { Label("Loading zones…", color = colors.dim, modifier = Modifier.padding(vertical = 16.dp)) }
                 vm.zones.isEmpty() -> item {

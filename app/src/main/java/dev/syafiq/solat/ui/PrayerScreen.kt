@@ -81,7 +81,10 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
                     color = colors.dim, size = 12.sp, caps = true,
                 )
                 Spacer(Modifier.height(4.dp))
-                Label(vm.zone?.district ?: "Tap to choose your zone", size = 16.sp, medium = true, maxLines = 2)
+                Label(
+                    (if (vm.autoZone) vm.place else null) ?: vm.zone?.district ?: "Tap to choose your zone",
+                    size = 16.sp, medium = true, maxLines = 2,
+                )
             }
             Spacer(Modifier.width(12.dp))
             Pill(if (vm.autoZone) "AUTO" else "MANUAL", active = vm.autoZone)
@@ -136,8 +139,8 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .background(colors.faint, RoundedCornerShape(20.dp))
-                    .padding(vertical = 14.dp),
+                    .background(colors.faint, RoundedCornerShape(8.dp))
+                    .padding(vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 SECONDARY.forEachIndexed { i, p ->

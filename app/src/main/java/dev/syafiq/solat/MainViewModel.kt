@@ -20,6 +20,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     var zone by mutableStateOf(repo.zone); private set
     var autoZone by mutableStateOf(repo.autoZone); private set
+    /** Town name from reverse geocoding, shown instead of the zone district in auto mode. */
+    var place by mutableStateOf(repo.place); private set
     var days by mutableStateOf<Map<LocalDate, PrayerDay>>(emptyMap()); private set
     var location by mutableStateOf<Location?>(null); private set
     var zones by mutableStateOf<List<Zone>>(emptyList()); private set
@@ -70,6 +72,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val loc = repo.location() ?: throw IllegalStateException("Couldn't get your location. Turn on location or pick a zone.")
         location = loc
         applyZone(repo.zoneAt(loc.latitude, loc.longitude))
+        val city = repo.placeAt(loc.latitude, loc.longitude) // null clears a stale town from an earlier location
+        place = city; repo.place = city
     }
 
     private fun refreshLocation() = viewModelScope.launch {

@@ -2,6 +2,8 @@ package dev.syafiq.solat.data
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.location.LocationListener
@@ -16,6 +18,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.YearMonth
+import java.util.Locale
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
@@ -31,6 +34,32 @@ class Repo(private val ctx: Context) {
     var autoZone: Boolean
         get() = prefs.getBoolean("auto", true)
         set(v) { prefs.edit().putBoolean("auto", v).apply() }
+
+    var place: String?
+        get() = prefs.getString("place", null)
+        set(v) { prefs.edit().putString("place", v).apply() }
+
+    /** Town name for a coordinate via the platform Geocoder; null when unavailable (no backend, offline). */
+    suspend fun placeAt(lat: Double, lng: Double): String? {
+        if (!Geocoder.isPresent()) return null
+        val geocoder = Geocoder(ctx, Locale("ms", "MY"))
+        val address = withTimeoutOrNull(8_000) {
+            if (Build.VERSION.SDK_INT >= 33) {
+                suspendCancellableCoroutine<Address?> { cont ->
+                    geocoder.getFromLocation(lat, lng, 1, object : Geocoder.GeocodeListener {
+                        override fun onGeocode(list: MutableList<Address>) = cont.resume(list.firstOrNull())
+                        override fun onError(message: String?) = cont.resume(null)
+                    })
+                }
+            } else {
+                withContext(Dispatchers.IO) {
+                    @Suppress("DEPRECATION")
+                    runCatching { geocoder.getFromLocation(lat, lng, 1)?.firstOrNull() }.getOrNull()
+                }
+            }
+        } ?: return null
+        return address.locality ?: address.subLocality ?: address.subAdminArea
+    }
 
     suspend fun month(zone: String, ym: YearMonth, force: Boolean = false): List<PrayerDay> {
         val key = "m_${zone}_$ym"
