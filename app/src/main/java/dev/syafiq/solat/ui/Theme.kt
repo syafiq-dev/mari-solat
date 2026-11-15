@@ -60,7 +60,11 @@ fun Label(
     modifier,
     style = TextStyle(
         fontFamily = if (caps) MonoFont else SansFont, // uppercase labels and callouts use the mono face
-        fontWeight = if (medium && !caps) FontWeight.Medium else FontWeight.Normal,
+        fontWeight = when { // mono has one weight file, so caps + medium uses synthetic bold
+            medium && caps -> FontWeight.Bold
+            medium -> FontWeight.Medium
+            else -> FontWeight.Normal
+        },
         fontSize = size,
         color = color,
         letterSpacing = if (caps) 0.06.em else 0.em,

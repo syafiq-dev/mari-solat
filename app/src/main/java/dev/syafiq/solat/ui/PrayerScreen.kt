@@ -105,7 +105,7 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(10.dp).background(Red, CircleShape))
                 Spacer(Modifier.width(10.dp))
-                Label("${prayer.label} in", caps = true, size = 16.sp, color = colors.dim)
+                Label("${prayer.label} in", caps = true, size = 16.sp, medium = true)
             }
             Spacer(Modifier.height(4.dp))
             Dots(countdown(Duration.between(now, at)), size = 64.sp)
