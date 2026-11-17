@@ -35,3 +35,12 @@ jobs:
           gh release delete latest --cleanup-tag --yes || true
           gh release create latest mari-solat.apk --target "$GITHUB_SHA" --title "Latest build" \
             --notes "Built from ${GITHUB_SHA::7}. Download mari-solat.apk below and open it on your phone."
+      - name: Publish PR builds as the preview release
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh release delete preview --cleanup-tag --yes || true
+          gh release create preview mari-solat.apk --prerelease --target "$SHA" --title "Preview build (PR #${{ github.event.number }})" \
+            --notes "Built from ${SHA::7} on a pull request, not yet in main. Download mari-solat.apk below to try it."
