@@ -101,7 +101,7 @@ class PrayerWidget : AppWidgetProvider() {
             val top = W * 0.13f
             val dotR = W * 0.0085f
             val letter = Paint(p).apply {
-                typeface = ctx.resources.getFont(R.font.grotesk_medium)
+                typeface = ctx.resources.getFont(R.font.doto_bold) // Ndot
                 textSize = stepX * 1.15f
                 textAlign = Paint.Align.CENTER
             }
@@ -122,18 +122,17 @@ class PrayerWidget : AppWidgetProvider() {
                 }
             }
 
-            // Bottom line, like the year widget: zone on the left, "1h 20m until ASAR" on the right.
+            // Bottom line, like the year widget: "1H 20M UNTIL ASAR" on the left, zone on the right.
             val zoneText = zone?.code ?: "—"
-            val time = next?.let { countdown(now, it.second) } ?: ""
-            val rest = next?.let { " until ${it.first.label.uppercase()}" } ?: "Open Mari Solat"
+            val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
+            val rest = next?.let { " UNTIL ${it.first.label.uppercase()}" } ?: "OPEN MARI SOLAT"
             val text = Paint(letter).apply { textAlign = Paint.Align.LEFT; textSize = W * 0.068f }
-            // shrink until both sides fit with a gap, e.g. "1h 59m until MAGHRIB"
+            // shrink until both sides fit with a gap, e.g. "1H 59M UNTIL MAGHRIB"
             while (text.measureText(zoneText) + text.measureText(time + rest) + W * 0.05f > right - left) text.textSize -= 1f
             val base = W * 0.87f
-            c.drawText(zoneText, left, base, text.apply { color = WHITE })
-            val restW = text.measureText(rest)
-            c.drawText(rest, right - restW, base, text.apply { color = GREY })
-            c.drawText(time, right - restW - text.measureText(time), base, text.apply { color = WHITE })
+            c.drawText(time, left, base, text.apply { color = WHITE })
+            c.drawText(rest, left + text.measureText(time), base, text.apply { color = GREY })
+            c.drawText(zoneText, right - text.measureText(zoneText), base, text.apply { color = WHITE })
 
             val summary = next?.let { "${it.first.label} in $time" } ?: "Open Mari Solat to load prayer times"
             return bmp to summary
