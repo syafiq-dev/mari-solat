@@ -21,6 +21,7 @@ import dev.syafiq.solat.data.dotOf
 import dev.syafiq.solat.data.nextPrayer
 import java.time.Instant
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -74,6 +75,7 @@ class PrayerWidget : AppWidgetProvider() {
         private const val DIM = 0xFF4A4A4A.toInt()
         private const val GREY = 0xFF8A8A8A.toInt()
         private const val RED = 0xFFD71921.toInt()
+        private val HHMM = DateTimeFormatter.ofPattern("HH:mm")
         private val LETTERS = mapOf(Prayer.FAJR to "S", Prayer.DHUHR to "Z", Prayer.ASR to "A", Prayer.MAGHRIB to "M", Prayer.ISHA to "I")
 
         private fun render(ctx: Context, now: Instant): Pair<Bitmap, String> {
@@ -122,7 +124,7 @@ class PrayerWidget : AppWidgetProvider() {
                 }
                 when (prayer) {
                     null -> c.drawCircle(x, y, dotR, p.apply { this.color = color })
-                    Prayer.SYURUK -> drawSun(c, x, y, room / 2 * 0.8f, p.apply { this.color = color })
+                    Prayer.SYURUK -> drawSun(c, x, y, room / 2 * 0.65f, p.apply { this.color = color })
                     else -> LETTERS.getValue(prayer).let { l ->
                         letter.getTextBounds(l, 0, 1, bounds)
                         c.drawText(l, x, y - bounds.exactCenterY(), letter.apply { this.color = color })
@@ -130,12 +132,12 @@ class PrayerWidget : AppWidgetProvider() {
                 }
             }
 
-            // Bottom line, like the year widget: "1H 20M UNTIL ASAR" on the left, zone on the right.
+            // Bottom line, like the year widget: "1H 20M → ASAR (16:20)" on the left, zone on the right.
             val zoneText = zone?.code ?: "—"
             val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
-            val rest = next?.let { " UNTIL ${it.first.label.uppercase()}" } ?: "OPEN MARI SOLAT"
+            val rest = next?.let { (np, at) -> " → ${np.label.uppercase()} (${HHMM.format(at.atZone(MYT))})" } ?: "OPEN MARI SOLAT"
             val text = Paint(letter).apply { textAlign = Paint.Align.LEFT; textSize = W * 0.068f }
-            // shrink until both sides fit with a gap, e.g. "1H 59M UNTIL MAGHRIB"
+            // shrink until both sides fit with a gap, e.g. "1H 59M → MAGHRIB (19:05)"
             while (text.measureText(zoneText) + text.measureText(time + rest) + W * 0.05f > right - left) text.textSize -= 1f
             val base = W * 0.87f
             c.drawText(time, left, base, text.apply { color = WHITE })
