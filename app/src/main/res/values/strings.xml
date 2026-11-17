@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Mari Solat</string>
+    <string name="widget_name">Prayer day</string>
+    <string name="widget_description">Today in 144 dots, 10 minutes each, with the next prayer countdown</string>
 </resources>

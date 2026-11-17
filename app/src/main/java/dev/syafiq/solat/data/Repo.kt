@@ -63,7 +63,7 @@ class Repo(private val ctx: Context) {
 
     suspend fun month(zone: String, ym: YearMonth, force: Boolean = false): List<PrayerDay> {
         val key = "m_${zone}_$ym"
-        if (!force) prefs.getString(key, null)?.let { return parseMonth(it) }
+        if (!force) cachedMonth(zone, ym)?.let { return it }
         return try {
             val body = get("/v2/solat/$zone?year=${ym.year}&month=${ym.monthValue}")
             parseMonth(body).also { prefs.edit().putString(key, body).apply() } // parse first so bad data is never cached
@@ -71,6 +71,10 @@ class Repo(private val ctx: Context) {
             prefs.getString(key, null)?.let { parseMonth(it) } ?: throw e
         }
     }
+
+    /** Month from the cache only, no network; the home-screen widget reads this. */
+    fun cachedMonth(zone: String, ym: YearMonth): List<PrayerDay>? =
+        prefs.getString("m_${zone}_$ym", null)?.let { runCatching { parseMonth(it) }.getOrNull() }
 
     suspend fun zones(): List<Zone> {
         prefs.getString("zones", null)?.let { return parseZones(it) }

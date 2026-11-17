@@ -65,6 +65,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             // last day of the month: tomorrow's Subuh lives in next month's table
             if (today == ym.atEndOfMonth()) list = list + runCatching { repo.month(code, ym.plusMonths(1), force) }.getOrDefault(emptyList())
             days = list.associateBy { it.date }
+            PrayerWidget.refresh(getApplication()) // fresh month in the cache, redraw the home-screen widget
         }
     }
 
