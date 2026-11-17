@@ -136,15 +136,19 @@ class PrayerWidget : AppWidgetProvider() {
             val zoneText = zone?.code ?: "—"
             val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
             val rest = next?.let { (np, at) -> " → ${np.label.uppercase()} (${HHMM.format(at.atZone(MYT))})" } ?: "OPEN MARI SOLAT"
-            val tl = W * 0.08f // text runs a little wider than the grid
-            val tr = W - tl
+            val tl = left - dotR // text ink lines up with the outer edges of the first and last dot columns
+            val tr = right + dotR
             val text = Paint(letter).apply { textAlign = Paint.Align.LEFT; textSize = W * 0.068f }
             // shrink until both sides fit with a gap, e.g. "1H 59M → MAGHRIB (19:05)"
             while (text.measureText(zoneText) + text.measureText(time + rest) + W * 0.05f > tr - tl) text.textSize -= 1f
             val base = W * 0.87f
-            c.drawText(time, tl, base, text.apply { color = WHITE })
-            c.drawText(rest, tl + text.measureText(time), base, text.apply { color = GREY })
-            c.drawText(zoneText, tr - text.measureText(zoneText), base, text.apply { color = WHITE })
+            val start = time + rest
+            text.getTextBounds(start, 0, start.length, bounds)
+            val x0 = tl - bounds.left // drop the glyph's side bearing so the ink, not the advance box, touches the edge
+            c.drawText(time, x0, base, text.apply { color = WHITE })
+            c.drawText(rest, x0 + text.measureText(time), base, text.apply { color = GREY })
+            text.getTextBounds(zoneText, 0, zoneText.length, bounds)
+            c.drawText(zoneText, tr - bounds.right, base, text.apply { color = WHITE })
 
             val summary = next?.let { "${it.first.label} in $time" } ?: "Open Mari Solat to load prayer times"
             return bmp to summary
