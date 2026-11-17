@@ -135,7 +135,10 @@ class PrayerWidget : AppWidgetProvider() {
             // Bottom line, like the year widget: "1H 20M → ASAR (16:20)" on the left, zone on the right.
             val zoneText = zone?.code ?: "—"
             val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
-            val rest = next?.let { (np, at) -> " → ${np.label.uppercase()} (${HHMM.format(at.atZone(MYT))})" } ?: "OPEN MARI SOLAT"
+            // grey line with only the next prayer's name in red: " → " ASAR " (16:20)"
+            val parts = next?.let { (np, at) -> listOf(" → " to GREY, np.label.uppercase() to RED, " (${HHMM.format(at.atZone(MYT))})" to GREY) }
+                ?: listOf("OPEN MARI SOLAT" to GREY)
+            val rest = parts.joinToString("") { it.first }
             val tl = left - dotR // text ink lines up with the outer edges of the first and last dot columns
             val tr = right + dotR
             val text = Paint(letter).apply { textAlign = Paint.Align.LEFT; textSize = W * 0.068f }
@@ -146,7 +149,11 @@ class PrayerWidget : AppWidgetProvider() {
             text.getTextBounds(start, 0, start.length, bounds)
             val x0 = tl - bounds.left // drop the glyph's side bearing so the ink, not the advance box, touches the edge
             c.drawText(time, x0, base, text.apply { color = WHITE })
-            c.drawText(rest, x0 + text.measureText(time), base, text.apply { color = GREY })
+            var x = x0 + text.measureText(time)
+            for ((str, col) in parts) {
+                c.drawText(str, x, base, text.apply { color = col })
+                x += text.measureText(str)
+            }
             text.getTextBounds(zoneText, 0, zoneText.length, bounds)
             c.drawText(zoneText, tr - bounds.right, base, text.apply { color = WHITE })
 
