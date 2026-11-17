@@ -136,13 +136,15 @@ class PrayerWidget : AppWidgetProvider() {
             val zoneText = zone?.code ?: "—"
             val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
             val rest = next?.let { (np, at) -> " → ${np.label.uppercase()} (${HHMM.format(at.atZone(MYT))})" } ?: "OPEN MARI SOLAT"
+            val tl = W * 0.08f // text runs a little wider than the grid
+            val tr = W - tl
             val text = Paint(letter).apply { textAlign = Paint.Align.LEFT; textSize = W * 0.068f }
             // shrink until both sides fit with a gap, e.g. "1H 59M → MAGHRIB (19:05)"
-            while (text.measureText(zoneText) + text.measureText(time + rest) + W * 0.05f > right - left) text.textSize -= 1f
+            while (text.measureText(zoneText) + text.measureText(time + rest) + W * 0.05f > tr - tl) text.textSize -= 1f
             val base = W * 0.87f
-            c.drawText(time, left, base, text.apply { color = WHITE })
-            c.drawText(rest, left + text.measureText(time), base, text.apply { color = GREY })
-            c.drawText(zoneText, right - text.measureText(zoneText), base, text.apply { color = WHITE })
+            c.drawText(time, tl, base, text.apply { color = WHITE })
+            c.drawText(rest, tl + text.measureText(time), base, text.apply { color = GREY })
+            c.drawText(zoneText, tr - text.measureText(zoneText), base, text.apply { color = WHITE })
 
             val summary = next?.let { "${it.first.label} in $time" } ?: "Open Mari Solat to load prayer times"
             return bmp to summary
