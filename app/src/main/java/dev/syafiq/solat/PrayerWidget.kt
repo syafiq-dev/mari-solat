@@ -10,6 +10,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.widget.RemoteViews
 import dev.syafiq.solat.data.COUNTDOWN
 import dev.syafiq.solat.data.MYT
@@ -99,11 +100,16 @@ class PrayerWidget : AppWidgetProvider() {
             val stepX = (right - left) / (COLS - 1)
             val stepY = W * 0.075f
             val top = W * 0.13f
-            val dotR = W * 0.0085f
+            val dotR = W * 0.0065f
+            // Letters grow until they nearly touch the neighbouring dots: widest glyph "M" fills the gap sideways.
+            val room = 2 * (stepX - dotR) * 0.95f
+            val bounds = Rect()
             val letter = Paint(p).apply {
                 typeface = ctx.resources.getFont(R.font.doto_bold) // Ndot
-                textSize = stepX * 1.15f
+                textSize = 100f
                 textAlign = Paint.Align.CENTER
+                getTextBounds("M", 0, 1, bounds)
+                textSize *= minOf(room / bounds.width(), 2 * (stepY - dotR) * 0.95f / bounds.height())
             }
             for (i in 0 until COLS * ROWS) {
                 val x = left + (i % COLS) * stepX
@@ -117,8 +123,11 @@ class PrayerWidget : AppWidgetProvider() {
                 }
                 when (prayer) {
                     null -> c.drawCircle(x, y, dotR, p.apply { this.color = color })
-                    Prayer.SYURUK -> drawSun(c, x, y, stepX * 0.42f, p.apply { this.color = color })
-                    else -> c.drawText(LETTERS.getValue(prayer), x, y - (letter.ascent() + letter.descent()) / 2, letter.apply { this.color = color })
+                    Prayer.SYURUK -> drawSun(c, x, y, room / 2 * 0.8f, p.apply { this.color = color })
+                    else -> LETTERS.getValue(prayer).let { l ->
+                        letter.getTextBounds(l, 0, 1, bounds)
+                        c.drawText(l, x, y - bounds.exactCenterY(), letter.apply { this.color = color })
+                    }
                 }
             }
 
