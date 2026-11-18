@@ -90,3 +90,9 @@ fun countdown(from: Instant, to: Instant): String {
     val m = (Duration.between(from, to).seconds + 59) / 60
     return if (m >= 60) "${m / 60}h ${m % 60}m" else "${m}m"
 }
+
+/** When the widget next redraws: the start of the next 10-minute dot, or the next prayer if that comes first. */
+fun nextTick(now: Instant, prayer: Instant?): Instant {
+    val dot = Instant.ofEpochSecond((now.epochSecond / 600 + 1) * 600)
+    return if (prayer != null && prayer.isAfter(now) && prayer.isBefore(dot)) prayer else dot
+}

@@ -19,6 +19,7 @@ import dev.syafiq.solat.data.Repo
 import dev.syafiq.solat.data.countdown
 import dev.syafiq.solat.data.dotOf
 import dev.syafiq.solat.data.nextPrayer
+import dev.syafiq.solat.data.nextTick
 import java.time.Instant
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -47,7 +48,8 @@ class PrayerWidget : AppWidgetProvider() {
             val mgr = AppWidgetManager.getInstance(ctx)
             val ids = mgr.getAppWidgetIds(ComponentName(ctx, PrayerWidget::class.java))
             if (ids.isEmpty()) return
-            val (bitmap, summary) = render(ctx, Instant.now())
+            val now = Instant.now()
+            val (bitmap, summary, prayerAt) = render(ctx, now)
             val views = RemoteViews(ctx.packageName, R.layout.widget_prayer).apply {
                 setImageViewBitmap(R.id.widget_image, bitmap)
                 setContentDescription(R.id.widget_image, summary)
@@ -57,9 +59,10 @@ class PrayerWidget : AppWidgetProvider() {
                 )
             }
             mgr.updateAppWidget(ids, views)
-            // Non-wakeup alarm each minute for the countdown: it waits while the screen is off, costing no battery.
-            val nextMinute = (System.currentTimeMillis() / 60_000 + 1) * 60_000
-            ctx.getSystemService(AlarmManager::class.java).setWindow(AlarmManager.RTC, nextMinute, 5_000, tick(ctx))
+            // Non-wakeup alarm on each 10-minute dot (or the prayer itself, if sooner): it waits while the screen is off.
+            // Every minute was too often: Android's standby limits (~10 alarms/hour) then skipped 20-30 minutes.
+            ctx.getSystemService(AlarmManager::class.java)
+                .setWindow(AlarmManager.RTC, nextTick(now, prayerAt).toEpochMilli(), 30_000, tick(ctx))
         }
 
         private fun tick(ctx: Context) = PendingIntent.getBroadcast(
@@ -78,7 +81,7 @@ class PrayerWidget : AppWidgetProvider() {
         private val HHMM = DateTimeFormatter.ofPattern("HH:mm")
         private val LETTERS = mapOf(Prayer.FAJR to "S", Prayer.DHUHR to "Z", Prayer.ASR to "A", Prayer.MAGHRIB to "M", Prayer.ISHA to "I")
 
-        private fun render(ctx: Context, now: Instant): Pair<Bitmap, String> {
+        private fun render(ctx: Context, now: Instant): Triple<Bitmap, String, Instant?> {
             val repo = Repo(ctx)
             val zone = repo.zone
             val today = now.atZone(MYT).toLocalDate()
@@ -158,7 +161,7 @@ class PrayerWidget : AppWidgetProvider() {
             c.drawText(zoneText, tr - bounds.right, base, text.apply { color = WHITE })
 
             val summary = next?.let { "${it.first.label} in $time" } ?: "Open Mari Solat to load prayer times"
-            return bmp to summary
+            return Triple(bmp, summary, next?.second)
         }
 
         /** Nothing-style sun: a dot ringed by eight smaller dots. */
