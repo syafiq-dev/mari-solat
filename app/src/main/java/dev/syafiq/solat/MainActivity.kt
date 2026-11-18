@@ -54,7 +54,7 @@ import dev.syafiq.solat.ui.SolatTheme
 import dev.syafiq.solat.ui.ZonePicker
 import dev.syafiq.solat.ui.colors
 import dev.syafiq.solat.ui.dotGrid
-import dev.syafiq.solat.ui.Dots
+import dev.syafiq.solat.ui.Label
 
 class MainActivity : ComponentActivity() {
     private val vm: MainViewModel by viewModels()
@@ -144,7 +144,7 @@ private fun TabBar(selected: Int, onSelect: (Int) -> Unit) {
             .padding(horizontal = 24.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        listOf("WAKTU", "KIBLAT").forEachIndexed { i, name ->
+        listOf("Waktu", "Kiblat").forEachIndexed { i, name ->
             val on = i == selected
             Column(
                 Modifier
@@ -152,7 +152,7 @@ private fun TabBar(selected: Int, onSelect: (Int) -> Unit) {
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Dots(name, size = 18.sp, color = if (on) colors.fg else colors.dim)
+                Label(name, size = 16.sp, medium = on, color = if (on) colors.fg else colors.dim)
                 Spacer(Modifier.height(6.dp))
                 Box(
                     Modifier

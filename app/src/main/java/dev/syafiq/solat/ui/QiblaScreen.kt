@@ -72,7 +72,7 @@ fun QiblaScreen(vm: MainViewModel, onNeedLocation: () -> Unit) {
         }
         if (loc == null) {
             Spacer(Modifier.weight(1f))
-            Dots("NO FIX", size = 40.sp, color = colors.dim)
+            Dots("--°", size = 56.sp, color = colors.dim)
             Spacer(Modifier.height(12.dp))
             Label("Qibla needs your location.", color = colors.dim)
             Spacer(Modifier.height(16.dp))
@@ -148,7 +148,7 @@ private fun Dial(heading: Float, bearing: Float, aligned: Boolean) {
             listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f).forEach { (label, deg) ->
                 val a = Math.toRadians(deg - 90.0)
                 val rr = r - 32.dp.toPx()
-                val layout = measurer.measure(label, TextStyle(fontFamily = DotFont, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = if (label == "N") c.fg else c.dim))
+                val layout = measurer.measure(label, TextStyle(fontFamily = SansFont, fontWeight = FontWeight.Medium, fontSize = 16.sp, color = if (label == "N") c.fg else c.dim))
                 val p = Offset(center.x + rr * cos(a).toFloat(), center.y + rr * sin(a).toFloat())
                 rotate(-rot, p) { // keep letters upright
                     drawText(layout, topLeft = Offset(p.x - layout.size.width / 2f, p.y - layout.size.height / 2f))

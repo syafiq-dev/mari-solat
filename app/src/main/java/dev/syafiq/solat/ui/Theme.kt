@@ -21,20 +21,23 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import dev.syafiq.solat.R
 
-val Red = Color(0xFFD71921)
+// Nothing OS widget red from the brand reference; the print N-Red #C8102E reads too dark on black
+val Red = Color(0xFFD71920)
 
 data class Palette(val bg: Color, val fg: Color, val dim: Color, val faint: Color)
 
-// Nothing brand palette: black, white, gray #B1B3B3, light gray #F4F4F4, red #D71921 used sparingly.
+// Nothing foundation palette: pure black, pure white, Window Grey #B1B3B3, N-Grey (reference gives #DCD7D2 but RGB 242/242/238;
+// the lighter RGB value keeps grey text readable on it). Red used sparingly.
 private val Dark = Palette(bg = Color.Black, fg = Color.White, dim = Color(0xFFB1B3B3), faint = Color(0xFF262626))
 // light mode keeps secondary text darker than #B1B3B3 so it stays readable on white
-private val Light = Palette(bg = Color.White, fg = Color.Black, dim = Color(0xFF6B6D6D), faint = Color(0xFFF4F4F4))
+private val Light = Palette(bg = Color.White, fg = Color.Black, dim = Color(0xFF6B6D6D), faint = Color(0xFFF2F2EE))
 
 val LocalPalette = staticCompositionLocalOf { Dark }
 val colors: Palette @Composable get() = LocalPalette.current
 
-// Nothing's type roles with open-licence stand-ins (the brand fonts are proprietary):
-// Ndot -> Doto (dot-matrix display), NType 82 -> Space Grotesk (headings/body), LL Lettera Mono -> Space Mono (labels).
+// Nothing's type roles with stand-ins (NType 82 and Lettera Mono are proprietary):
+// NDot -> dot-matrix, hero numerals only, one size per screen; NType 82 -> Space Grotesk (headlines/body);
+// Lettera Mono -> Space Mono (small metadata labels, tracking 0).
 val DotFont = FontFamily(Font(R.font.doto_bold, FontWeight.Bold))
 val SansFont = FontFamily(Font(R.font.grotesk_regular), Font(R.font.grotesk_medium, FontWeight.Medium))
 val MonoFont = FontFamily(Font(R.font.mono_regular))
@@ -44,7 +47,7 @@ fun SolatTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalPalette provides if (isSystemInDarkTheme()) Dark else Light, content = content)
 }
 
-/** Body / label text. */
+/** Body text (NType Regular role, sentence case) or, with [caps], a small mono metadata label (Lettera role). */
 @Composable
 fun Label(
     text: String,
@@ -59,7 +62,7 @@ fun Label(
     if (caps) text.uppercase() else text,
     modifier,
     style = TextStyle(
-        fontFamily = if (caps) MonoFont else SansFont, // uppercase labels and callouts use the mono face
+        fontFamily = if (caps) MonoFont else SansFont,
         fontWeight = when { // mono has one weight file, so caps + medium uses synthetic bold
             medium && caps -> FontWeight.Bold
             medium -> FontWeight.Medium
@@ -67,18 +70,29 @@ fun Label(
         },
         fontSize = size,
         color = color,
-        letterSpacing = if (caps) 0.06.em else 0.em,
+        // brand reference: mono tracking 0 / leading 140%; NType +1% tracking, leading 125% up to 15pt, 115% above
+        letterSpacing = if (caps) 0.em else 0.01.em,
+        lineHeight = if (caps) 1.4.em else if (size.value <= 15f) 1.25.em else 1.15.em,
         textAlign = align,
     ),
     maxLines = maxLines,
 )
 
-/** Dot-matrix numerals and headings. */
+/** Short one- or two-word headline (NType Headline role): 40sp+, -2% tracking, sentence case. */
+@Composable
+fun Headline(text: String, modifier: Modifier = Modifier, size: TextUnit = 40.sp, color: Color = colors.fg) = BasicText(
+    text,
+    modifier,
+    style = TextStyle(fontFamily = SansFont, fontWeight = FontWeight.Medium, fontSize = size, color = color, letterSpacing = (-0.02).em),
+    maxLines = 1,
+)
+
+/** Dot-matrix hero numerals. Reference rule: tracking untouched, one size per screen. */
 @Composable
 fun Dots(text: String, modifier: Modifier = Modifier, size: TextUnit = 20.sp, color: Color = colors.fg) = BasicText(
     text,
     modifier,
-    style = TextStyle(fontFamily = DotFont, fontWeight = FontWeight.Bold, fontSize = size, color = color, letterSpacing = 0.04.em),
+    style = TextStyle(fontFamily = DotFont, fontWeight = FontWeight.Bold, fontSize = size, color = color),
 )
 
 /** Subtle dot grid behind content, like Nothing's Glyph surfaces. */
