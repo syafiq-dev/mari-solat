@@ -28,7 +28,7 @@ import kotlin.math.sin
 
 /**
  * Home-screen widget: the day as 144 dots (10 minutes each, 16 x 9), lit up to now.
- * Each prayer's dot is replaced by its letter (S, sun, Z, A, M, I); the next one is red, the rest white.
+ * Each prayer's dot is replaced by its letter (S, sun, Z, A, M, I); the current one is red, the rest white.
  * Drawn to a bitmap because RemoteViews can't lay out a dot grid or use the app's fonts.
  */
 class PrayerWidget : AppWidgetProvider() {
@@ -92,6 +92,8 @@ class PrayerWidget : AppWidgetProvider() {
             val day = days[today]
             val next = nextPrayer(days, now)
             val nowDot = dotOf(now)
+            // the prayer whose time we're in now; none before Subuh, as last night's Isyak isn't on today's grid
+            val current = day?.let { d -> COUNTDOWN.lastOrNull { !d.times.getValue(it).isAfter(now) } }
             val marks = day?.let { d -> COUNTDOWN.associateBy { dotOf(d.times.getValue(it)) } }.orEmpty()
 
             val bmp = Bitmap.createBitmap(W.toInt(), W.toInt(), Bitmap.Config.ARGB_8888)
@@ -121,7 +123,7 @@ class PrayerWidget : AppWidgetProvider() {
                 val y = top + (i / COLS) * stepY
                 val prayer = marks[i]
                 val color = when {
-                    prayer != null && prayer == next?.first -> RED
+                    prayer != null && prayer == current -> RED
                     prayer != null || (day != null && i <= nowDot) -> WHITE
                     else -> DIM
                 }
