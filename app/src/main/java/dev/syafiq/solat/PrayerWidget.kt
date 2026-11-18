@@ -103,7 +103,7 @@ class PrayerWidget : AppWidgetProvider() {
             val stepY = W * 0.075f
             val top = W * 0.13f
             val dotR = W * 0.0065f
-            // Letters grow until they nearly touch the neighbouring dots: widest glyph "M" fills the gap sideways.
+            // Space between the neighbouring dots; letters take half of it, the sun a little more.
             val room = 2 * (stepX - dotR) * 0.95f
             val bounds = Rect()
             val letter = Paint(p).apply {
@@ -111,7 +111,7 @@ class PrayerWidget : AppWidgetProvider() {
                 textSize = 100f
                 textAlign = Paint.Align.CENTER
                 getTextBounds("M", 0, 1, bounds)
-                textSize *= minOf(room / bounds.width(), 2 * (stepY - dotR) * 0.95f / bounds.height())
+                textSize *= minOf(room / 2 / bounds.width(), (stepY - dotR) * 0.95f / bounds.height()) // half the gap, so prayers in neighbouring dots (e.g. A above M) never overlap
             }
             for (i in 0 until COLS * ROWS) {
                 val x = left + (i % COLS) * stepX
