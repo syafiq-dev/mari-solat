@@ -147,8 +147,8 @@ private fun Dial(heading: Float, bearing: Float, aligned: Boolean) {
             }
             listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f).forEach { (label, deg) ->
                 val a = Math.toRadians(deg - 90.0)
-                val rr = r - 32.dp.toPx()
-                val layout = measurer.measure(label, TextStyle(fontFamily = SansFont, fontWeight = FontWeight.Medium, fontSize = 16.sp, color = if (label == "N") c.fg else c.dim))
+                val rr = r - 36.dp.toPx() // inset so the larger letters clear the tick ring
+                val layout = measurer.measure(label, TextStyle(fontFamily = SansFont, fontWeight = FontWeight.Medium, fontSize = 24.sp, color = if (label == "N") c.fg else c.dim))
                 val p = Offset(center.x + rr * cos(a).toFloat(), center.y + rr * sin(a).toFloat())
                 rotate(-rot, p) { // keep letters upright
                     drawText(layout, topLeft = Offset(p.x - layout.size.width / 2f, p.y - layout.size.height / 2f))
