@@ -45,7 +45,7 @@ fun ZonePicker(vm: MainViewModel, onAuto: () -> Unit, onPick: (Zone) -> Unit, on
     Column(Modifier.fillMaxSize().imePadding().padding(horizontal = 24.dp)) {
         Spacer(Modifier.height(20.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Dots("ZONE", size = 28.sp, modifier = Modifier.weight(1f))
+            Headline("Zone", modifier = Modifier.weight(1f))
             Label("Close", caps = true, size = 12.sp, medium = true, modifier = Modifier.clickable(onClick = onClose).padding(8.dp))
         }
         Spacer(Modifier.height(16.dp))
@@ -88,12 +88,12 @@ fun ZonePicker(vm: MainViewModel, onAuto: () -> Unit, onPick: (Zone) -> Unit, on
                     Label("Selected", caps = true, size = 11.sp, color = colors.dim)
                     Spacer(Modifier.height(2.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Dots(z.code, size = 16.sp, color = Red)
+                        Label(z.code, size = 13.sp, color = Red, caps = true)
                         Spacer(Modifier.width(10.dp))
                         Label((if (vm.autoZone) vm.place else null) ?: z.district, size = 14.sp, maxLines = 1)
                     }
                 }
-                Pill(if (vm.autoZone) "AUTO" else "MANUAL", active = vm.autoZone)
+                Pill(if (vm.autoZone) "Auto" else "Manual", active = vm.autoZone)
             }
         }
         Box(Modifier.fillMaxWidth().padding(top = 8.dp).height(1.dp).background(colors.faint))
@@ -125,7 +125,7 @@ private fun ZoneRow(z: Zone, selected: Boolean, onClick: () -> Unit) {
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Dots(z.code, size = 16.sp, color = if (selected) Red else colors.fg, modifier = Modifier.width(64.dp))
+        Label(z.code, size = 13.sp, caps = true, color = if (selected) Red else colors.fg, modifier = Modifier.width(64.dp))
         Label(z.district, size = 14.sp, color = if (selected) colors.fg else colors.dim, modifier = Modifier.weight(1f))
     }
 }

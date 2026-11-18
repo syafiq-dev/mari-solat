@@ -87,13 +87,12 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
                 )
             }
             Spacer(Modifier.width(12.dp))
-            Pill(if (vm.autoZone) "AUTO" else "MANUAL", active = vm.autoZone)
+            Pill(if (vm.autoZone) "Auto" else "Manual", active = vm.autoZone)
         }
 
         Spacer(Modifier.height(36.dp))
         Label(
-            today.format(DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH)).uppercase() + "  |  " +
-                today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH)),
+            today.format(DateTimeFormatter.ofPattern("EEE, d MMMM yyyy", Locale.ENGLISH)),
             size = 20.sp,
         )
         day?.let { Label(formatHijri(it.hijri), color = colors.dim, size = 20.sp) }
@@ -105,12 +104,13 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(10.dp).background(Red, CircleShape))
                 Spacer(Modifier.width(10.dp))
-                Label("${prayer.label} in", caps = true, size = 16.sp, medium = true)
+                Label("${prayer.label} in", size = 16.sp, medium = true)
             }
             Spacer(Modifier.height(4.dp))
             Dots(countdown(Duration.between(now, at)), size = 64.sp)
         } else {
-            Dots(if (vm.busy) "LOADING" else "--:--:--", size = 48.sp, color = colors.dim)
+            Dots("--:--:--", size = 64.sp, color = colors.dim)
+            if (vm.busy) Label("Loading…", color = colors.dim)
         }
 
         vm.error?.let {
@@ -149,7 +149,7 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
                     Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Label(p.label, caps = true, size = 11.sp, color = if (p == nextPrayer) Red else colors.dim)
                         Spacer(Modifier.height(4.dp))
-                        Dots(zt.format(timeFmt) + if (is24h) "" else zt.format(ampm).lowercase(), size = 18.sp)
+                        Label(zt.format(timeFmt) + if (is24h) "" else zt.format(ampm).lowercase(), size = 18.sp, medium = true)
                     }
                 }
             }
@@ -174,7 +174,7 @@ fun PrayerScreen(vm: MainViewModel, onChangeZone: () -> Unit, onNeedLocation: ()
                     Spacer(Modifier.width(12.dp))
                     Label(p.label, size = 17.sp, color = tint, medium = isNext, modifier = Modifier.weight(1f))
                     val zt = t.atZone(MYT)
-                    Dots(zt.format(timeFmt), size = 24.sp, color = tint)
+                    Label(zt.format(timeFmt), size = 24.sp, color = tint, medium = isNext)
                     if (!is24h) {
                         Spacer(Modifier.width(6.dp))
                         Label(zt.format(ampm), size = 11.sp, color = colors.dim, modifier = Modifier.width(22.dp))
@@ -200,7 +200,7 @@ fun Pill(text: String, active: Boolean, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Box(Modifier.size(5.dp).background(if (active) Red else colors.dim, CircleShape))
-        Label(text, size = 11.sp, medium = true)
+        Label(text, size = 11.sp, caps = true)
     }
 }
 
