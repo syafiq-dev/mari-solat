@@ -2,8 +2,11 @@ package dev.syafiq.solat
 
 import dev.syafiq.solat.data.Prayer
 import dev.syafiq.solat.data.Qibla
+import dev.syafiq.solat.data.countdown
+import dev.syafiq.solat.data.dotOf
 import dev.syafiq.solat.data.formatHijri
 import dev.syafiq.solat.data.nextPrayer
+import dev.syafiq.solat.data.nextTick
 import dev.syafiq.solat.data.parseGpsZone
 import dev.syafiq.solat.data.parseMonth
 import dev.syafiq.solat.data.parseZones
@@ -57,4 +60,20 @@ class LogicTest {
     }
 
     @Test fun hijri() = assertEquals("23 Jamadilawal 1448", formatHijri("1448-05-23"))
+
+    @Test fun widgetDotsAndCountdown() {
+        fun at(s: String) = LocalDateTime.parse(s).atZone(dev.syafiq.solat.data.MYT).toInstant()
+        assertEquals(0, dotOf(at("2026-11-14T00:09")))
+        assertEquals(98, dotOf(at("2026-11-14T16:20")))
+        assertEquals(143, dotOf(at("2026-11-14T23:59")))
+        assertEquals("1h 20m", countdown(at("2026-11-14T15:00"), at("2026-11-14T16:20")))
+        assertEquals("1m", countdown(at("2026-11-14T16:19:30"), at("2026-11-14T16:20")))
+    }
+
+    @Test fun widgetTicksOnDotsAndPrayers() {
+        fun at(s: String) = LocalDateTime.parse(s).atZone(dev.syafiq.solat.data.MYT).toInstant()
+        assertEquals(at("2026-11-14T13:10"), nextTick(at("2026-11-14T13:04:30"), at("2026-11-14T16:20")))
+        assertEquals(at("2026-11-14T13:03"), nextTick(at("2026-11-14T13:00"), at("2026-11-14T13:03")))
+        assertEquals(at("2026-11-14T13:10"), nextTick(at("2026-11-14T13:00"), null))
+    }
 }

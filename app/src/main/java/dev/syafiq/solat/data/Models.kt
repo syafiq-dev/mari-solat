@@ -2,6 +2,7 @@ package dev.syafiq.solat.data
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -79,4 +80,19 @@ private val HIJRI_MONTHS = listOf(
 fun formatHijri(iso: String): String {
     val (y, m, d) = iso.split("-").map { it.toInt() }
     return "$d ${HIJRI_MONTHS[m - 1]} $y"
+}
+
+/** Widget dot (0..143) holding [t]: the day in 10-minute slots from midnight, Malaysian time. */
+fun dotOf(t: Instant): Int = t.atZone(MYT).let { (it.hour * 60 + it.minute) / 10 }
+
+/** "1h 20m" / "45m", rounding up so it never shows 0m before the prayer. */
+fun countdown(from: Instant, to: Instant): String {
+    val m = (Duration.between(from, to).seconds + 59) / 60
+    return if (m >= 60) "${m / 60}h ${m % 60}m" else "${m}m"
+}
+
+/** When the widget next redraws: the start of the next 10-minute dot, or the next prayer if that comes first. */
+fun nextTick(now: Instant, prayer: Instant?): Instant {
+    val dot = Instant.ofEpochSecond((now.epochSecond / 600 + 1) * 600)
+    return if (prayer != null && prayer.isAfter(now) && prayer.isBefore(dot)) prayer else dot
 }
