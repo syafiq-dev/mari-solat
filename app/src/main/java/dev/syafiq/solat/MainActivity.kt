@@ -22,6 +22,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +41,7 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -76,7 +79,8 @@ private fun Context.locationOn() = LocationManagerCompat.isLocationEnabled(getSy
 
 @Composable
 private fun App(vm: MainViewModel) {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val pager = rememberPagerState { 2 }
+    val scope = rememberCoroutineScope()
     var picking by rememberSaveable { mutableStateOf(false) }
 
     val activity = LocalContext.current as ComponentActivity
@@ -124,13 +128,14 @@ private fun App(vm: MainViewModel) {
             )
         } else {
             Column(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f)) {
-                    when (tab) {
+                // swipe left/right between WAKTU and KIBLAT; the tab bar still works too
+                HorizontalPager(pager, Modifier.weight(1f)) { page ->
+                    when (page) {
                         0 -> PrayerScreen(vm, onChangeZone = { picking = true }, onNeedLocation = askLocation)
                         else -> QiblaScreen(vm, onNeedLocation = askLocation)
                     }
                 }
-                TabBar(tab) { tab = it }
+                TabBar(pager.currentPage) { scope.launch { pager.animateScrollToPage(it) } }
             }
         }
     }

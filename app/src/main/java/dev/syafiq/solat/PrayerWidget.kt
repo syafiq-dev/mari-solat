@@ -159,7 +159,7 @@ class PrayerWidget : AppWidgetProvider() {
                 c.drawText(str, x, base, text.apply { color = col })
                 x += text.measureText(str)
             }
-            text.textSize = W * 0.04f
+            text.textSize = W * 0.06f
             text.getTextBounds(zoneText, 0, zoneText.length, bounds)
             c.drawText(zoneText, tl - bounds.left, W * 0.095f, text.apply { color = GREY })
 
