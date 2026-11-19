@@ -92,8 +92,8 @@ class PrayerWidget : AppWidgetProvider() {
             val day = days[today]
             val next = nextPrayer(days, now)
             val nowDot = dotOf(now)
-            // the prayer whose time we're in now; none before Subuh, as last night's Isyak isn't on today's grid
-            val current = day?.let { d -> COUNTDOWN.lastOrNull { !d.times.getValue(it).isAfter(now) } }
+            // the prayer whose time we're in now; before Subuh that's still Isyak, so today's I stays red
+            val current = day?.let { d -> COUNTDOWN.lastOrNull { !d.times.getValue(it).isAfter(now) } ?: Prayer.ISHA }
             val marks = day?.let { d -> COUNTDOWN.associateBy { dotOf(d.times.getValue(it)) } }.orEmpty()
 
             val bmp = Bitmap.createBitmap(W.toInt(), W.toInt(), Bitmap.Config.ARGB_8888)
