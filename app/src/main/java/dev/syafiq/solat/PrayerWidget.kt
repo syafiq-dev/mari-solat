@@ -140,8 +140,8 @@ class PrayerWidget : AppWidgetProvider() {
             // Bottom line, like the year widget: "1H 20M → ASAR (16:20)" on the left, zone on the right.
             val zoneText = zone?.code ?: "—"
             val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
-            // grey line with only the next prayer's name in red: " → " ASAR " (16:20)"
-            val parts = next?.let { (np, at) -> listOf(" → " to GREY, np.label.uppercase() to RED, " (${HHMM.format(at.atZone(MYT))})" to GREY) }
+            // grey line with the next prayer's name in white: " → " ASAR " (16:20)"
+            val parts = next?.let { (np, at) -> listOf(" → " to GREY, np.label.uppercase() to WHITE, " (${HHMM.format(at.atZone(MYT))})" to GREY) }
                 ?: listOf("OPEN MARI SOLAT" to GREY)
             val rest = parts.joinToString("") { it.first }
             val tl = left - dotR // text ink lines up with the outer edges of the first and last dot columns
