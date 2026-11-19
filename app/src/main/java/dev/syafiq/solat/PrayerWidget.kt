@@ -106,7 +106,7 @@ class PrayerWidget : AppWidgetProvider() {
             val right = W - left
             val stepX = (right - left) / (COLS - 1)
             val stepY = W * 0.075f
-            val top = W * 0.13f
+            val top = W * 0.16f
             val dotR = W * 0.0065f
             // Space between the neighbouring dots; letters take half of it, the sun a little more.
             val room = 2 * (stepX - dotR) * 0.95f
@@ -137,7 +137,7 @@ class PrayerWidget : AppWidgetProvider() {
                 }
             }
 
-            // Bottom line, like the year widget: "1H 20M → ASAR (16:20)" on the left, zone on the right.
+            // Bottom line, like the year widget: "1H 20M → ASAR (16:20)"; the zone sits small, top left.
             val zoneText = zone?.code ?: "—"
             val time = next?.let { countdown(now, it.second).uppercase() } ?: ""
             // grey line with the next prayer's name in white: " → " ASAR " (16:20)"
@@ -147,9 +147,9 @@ class PrayerWidget : AppWidgetProvider() {
             val tl = left - dotR // text ink lines up with the outer edges of the first and last dot columns
             val tr = right + dotR
             val text = Paint(letter).apply { textAlign = Paint.Align.LEFT; textSize = W * 0.068f }
-            // shrink until both sides fit with a gap, e.g. "1H 59M → MAGHRIB (19:05)"
+            // shrink until it fits (sized as if the zone still shared the line, which looked right), e.g. "1H 59M → MAGHRIB (19:05)"
             while (text.measureText(zoneText) + text.measureText(time + rest) + W * 0.05f > tr - tl) text.textSize -= 1f
-            val base = W * 0.87f
+            val base = W * 0.90f
             val start = time + rest
             text.getTextBounds(start, 0, start.length, bounds)
             val x0 = tl - bounds.left // drop the glyph's side bearing so the ink, not the advance box, touches the edge
@@ -159,8 +159,9 @@ class PrayerWidget : AppWidgetProvider() {
                 c.drawText(str, x, base, text.apply { color = col })
                 x += text.measureText(str)
             }
+            text.textSize = W * 0.04f
             text.getTextBounds(zoneText, 0, zoneText.length, bounds)
-            c.drawText(zoneText, tr - bounds.right, base, text.apply { color = WHITE })
+            c.drawText(zoneText, tl - bounds.left, W * 0.095f, text.apply { color = GREY })
 
             val summary = next?.let { "${it.first.label} in $time" } ?: "Open Mari Solat to load prayer times"
             return Triple(bmp, summary, next?.second)
